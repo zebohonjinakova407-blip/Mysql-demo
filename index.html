@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySQL demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 500px; margin: 30px auto; padding: 0 15px; }
+    h1 { font-size: 28px; margin-bottom: 15px; }
+    .form-group { display: flex; gap: 8px; margin-bottom: 20px; }
+    input { flex: 1; padding: 10px; font-size: 16px; border: 2px solid #000; border-radius: 4px; }
+    button { padding: 10px 18px; font-size: 16px; cursor: pointer; border: 1px solid #888; border-radius: 4px; background: #f3f4f6; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 10px; font-size: 17px; }
+    .date { color: #6b7280; font-size: 14px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Ismingizni qoldiring</h1>
+  <div class="form-group">
+    <input type="text" id="nameInput" placeholder="Ism">
+    <button onclick="saveName()">Saqlash</button>
+  </div>
+  <ul id="list"></ul>
+
+  <script>
+    async function load() {
+      const res = await fetch('/.netlify/functions/api');
+      const data = await res.json();
+      document.getElementById('list').innerHTML = data.map(r => {
+        const d = new Date(r.created_at).toLocaleString('en-GB');
+        return <li>${r.name} <span class="date">(${d})</span></li>;
+      }).join('');
+    }
+
+    async function saveName() {
+      const inp = document.getElementById('nameInput');
+      if (!inp.value.trim()) return;
+      await fetch('/.netlify/functions/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: inp.value.trim() })
+      });
+      inp.value = '';
+      load();
+    }
+    load();
+  </script>
+</body>
+</html>
